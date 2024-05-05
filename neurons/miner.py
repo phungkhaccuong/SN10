@@ -26,7 +26,7 @@ import sturdy
 # import base miner class which takes care of most of the boilerplate
 from sturdy.base.miner import BaseMinerNeuron
 from sturdy.constants import CHUNK_RATIO
-from sturdy.utils.misc import greedy_allocation_algorithm
+from sturdy.utils.misc import greedy_allocation_algorithm, lazy_allocation_algorithm
 
 
 class Miner(BaseMinerNeuron):
@@ -62,7 +62,8 @@ class Miner(BaseMinerNeuron):
 
         # use default greedy alloaction algorithm to generate allocations
         try:
-            synapse.allocations = greedy_allocation_algorithm(synapse)
+            # synapse.allocations = greedy_allocation_algorithm(synapse)
+            synapse.allocations = lazy_allocation_algorithm(synapse)
         except Exception as e:
             bt.logging.error(f"Error: {e}")
 

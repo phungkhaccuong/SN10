@@ -137,6 +137,7 @@ class TestValidator(IsolatedAsyncioTestCase):
             timeout=QUERY_TIMEOUT,
         )
 
+
         # TODO: better testing?
         rewards, _ = get_rewards(
             validator,

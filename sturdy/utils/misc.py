@@ -64,6 +64,17 @@ def calculate_apy(util_rate: float, pool: Dict) -> float:
     return interest_rate
 
 
+def lazy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
+    max_balance = synapse.assets_and_pools["total_assets"]
+    balance = max_balance
+    pools = synapse.assets_and_pools["pools"]
+
+    # must allocate borrow amount as a minimum to ALL pools
+    balance -= sum([v["borrow_amount"] for k, v in pools.items()])
+    current_allocations = {k: v["borrow_amount"] for k, v in pools.items()}
+    return current_allocations
+
+
 def greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
     max_balance = synapse.assets_and_pools["total_assets"]
     balance = max_balance
