@@ -63,8 +63,8 @@ class Miner(BaseMinerNeuron):
         # use default greedy alloaction algorithm to generate allocations
         try:
             # synapse.allocations = greedy_allocation_algorithm(synapse)
-            # synapse.allocations = lazy_allocation_algorithm(synapse)
-            synapse.allocations = lazy_and_humble_allocation_algorithm(synapse)
+            synapse.allocations = lazy_allocation_algorithm(synapse)
+            # synapse.allocations = lazy_and_humble_allocation_algorithm(synapse)
 
         except Exception as e:
             bt.logging.error(f"Error: {e}")
