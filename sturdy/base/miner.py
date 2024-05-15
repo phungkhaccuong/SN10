@@ -36,7 +36,7 @@ class InspectAxon(bt.axon):
         super().__init__(args, kwargs)
 
     async def preprocess(self, request: Request) -> bt.Synapse:
-        bt.logging.info(f"Receiving request from {request.client.host} {request.headers} {request.body}")
+        bt.logging.info(f"Receiving request from {request.client.host} {request.headers} {request.body()}")
         return super().preprocess(request)
 
 class BaseMinerNeuron(BaseNeuron):
