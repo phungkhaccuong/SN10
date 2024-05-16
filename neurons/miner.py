@@ -19,6 +19,7 @@
 import time
 import typing
 import bittensor as bt
+from fastapi import Request
 
 # Bittensor Miner Template:
 import sturdy
@@ -41,6 +42,24 @@ class Miner(BaseMinerNeuron):
 
     def __init__(self, config=None):
         super(Miner, self).__init__(config=config)
+
+    async def forward1(
+        self, request: Request
+    ):
+
+        bt.logging.debug("forward()")
+        # TODO: check to see that validators don't send unacceptable responses to miners???
+
+        # use default greedy alloaction algorithm to generate allocations
+        try:
+            # this is the base model
+            # synapse.allocations = greedy_allocation_algorithm(synapse)
+            bt.logging.info(f"HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            bt.logging.info(f"Info: {request.client.host}")
+        except Exception as e:
+            bt.logging.error(f"Error: {e}")
+
+        bt.logging.info(f"ok ok ")
 
     async def forward(
         self, synapse: sturdy.protocol.AllocateAssets
