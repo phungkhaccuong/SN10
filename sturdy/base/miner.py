@@ -32,8 +32,11 @@ from sturdy.utils.wandb import init_wandb_miner
 
 class InspectAxon(bt.axon):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+    def __init__(self, wallet=None, config=None):
+        super().__init__(wallet=wallet, config=config)
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(args, kwargs)
 
     async def preprocess(self, request: Request) -> bt.Synapse:
         bt.logging.info(f"Receiving request from.......................................... {request.client.host} {request.headers}")
