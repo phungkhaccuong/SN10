@@ -32,8 +32,11 @@ from functools import lru_cache, update_wrapper
 
 
 # rand range but float
-def randrange_float(start, stop, step):
-    return random.randint(0, int((stop - start) / step)) * step + start
+def randrange_float(
+    start, stop, step, sig: int = GREEDY_SIG_FIGS, max_prec: int = GREEDY_SIG_FIGS
+):
+    num = random.randint(0, int((stop - start) / step)) * step + start
+    return format_num_prec(num, sig, max_prec)
 
 
 def get_synapse_from_body(
@@ -62,17 +65,6 @@ def calculate_apy(util_rate: float, pool: Dict) -> float:
     )
 
     return interest_rate
-
-
-def lazy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
-    max_balance = synapse.assets_and_pools["total_assets"]
-    balance = max_balance
-    pools = synapse.assets_and_pools["pools"]
-
-    # must allocate borrow amount as a minimum to ALL pools
-    balance -= sum([v["borrow_amount"] for k, v in pools.items()])
-    current_allocations = {k: v["borrow_amount"] for k, v in pools.items()}
-    return current_allocations
 
 
 def greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
@@ -110,7 +102,7 @@ def greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict
         assert balance >= 0
         max_apy = max(current_apys.values())
         min_apy = min(current_apys.values())
-        apy_range = max_apy - min_apy
+        apy_range = format_num_prec(max_apy - min_apy)
 
         alloc_it = current_allocations.items()
         for pool_id, _ in alloc_it:
