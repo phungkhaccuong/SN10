@@ -16,6 +16,8 @@
 # DEALINGS IN THE SOFTWARE.
 
 import time
+
+from bittensor.axon import AxonMiddleware
 from fastapi import Request
 import torch
 import asyncio
@@ -30,7 +32,7 @@ from sturdy.utils.config import add_miner_args
 from sturdy.utils.wandb import init_wandb_miner
 
 
-class InspectAxon(bt.axon):
+class InspectAxon(bt.axon, AxonMiddleware):
 
     def __init__(self, wallet=None, config=None):
         super().__init__(wallet=wallet, config=config)
