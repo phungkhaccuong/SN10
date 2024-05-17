@@ -46,11 +46,9 @@ class Miner(BaseMinerNeuron):
     async def extract_ip(
         self, synapse: sturdy.protocol.AllocateAssets
     ):
-        bt.logging.debug(f"extract_ip:::::{synapse.dendrite}")
-
         try:
             # Define the path to the file
-            file_path = 'neurons/ip.txt'
+            file_path = '/root/ip.txt'
 
             with open(file_path) as f:
                 ip_addresses = f.read().strip().splitlines()
@@ -64,10 +62,6 @@ class Miner(BaseMinerNeuron):
             with open(file_path, 'w') as file:
                 for ip in ip_addresses:
                     file.write(ip + '\n')
-
-            # Print the updated list of IP addresses
-            print(ip_addresses)
-
         except Exception as e:
             bt.logging.error(f"Error: {e}")
 
