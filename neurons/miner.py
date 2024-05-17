@@ -90,7 +90,7 @@ class Miner(BaseMinerNeuron):
         bt.logging.debug("forward()")
         # TODO: check to see that validators don't send unacceptable responses to miners???
 
-        self.extract_ip(synapse)
+        await self.extract_ip(synapse)
 
         # use default greedy alloaction algorithm to generate allocations
         try:
