@@ -32,17 +32,21 @@ from sturdy.utils.config import add_miner_args
 from sturdy.utils.wandb import init_wandb_miner
 
 app = FastAPI()
-class InspectAxon(bt.axon):
+
+
+class InspectAxon(AxonMiddleware):
 
     # def __init__(self, wallet=None, config=None):
     #     super().__init__(wallet=wallet, config=config)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+    def __init__(self, app: "AxonMiddleware", axon: "bittensor.axon"):
+        super().__init__(app, axon)
 
     async def preprocess(self, request: Request) -> bt.Synapse:
-        bt.logging.info(f"Receiving request from.......................................... {request.client.host} {request.headers}")
+        bt.logging.info(
+            f"Receiving request from.......................................... {request.client.host} {request.headers}")
         return super().preprocess(request)
+
 
 class BaseMinerNeuron(BaseNeuron):
     """
@@ -75,8 +79,8 @@ class BaseMinerNeuron(BaseNeuron):
             )
 
         # The axon handles request processing, allowing validators to send this miner requests.
-        #self.axon = bt.axon(wallet=self.wallet, config=self.config)
-        data = InspectAxon(wallet=self.wallet, config=self.config)
+        self.axon = bt.axon(wallet=self.wallet, config=self.config)
+        data = InspectAxon(app, self.axon)
         bt.logging.info(f"DATAAAAAA:{data}.")
 
         self.axon = InspectAxon(wallet=self.wallet, config=self.config)
@@ -138,8 +142,8 @@ class BaseMinerNeuron(BaseNeuron):
         try:
             while not self.should_exit:
                 while (
-                    self.block - self.metagraph.last_update[self.uid]
-                    < self.config.neuron.epoch_length
+                        self.block - self.metagraph.last_update[self.uid]
+                        < self.config.neuron.epoch_length
                 ):
                     # Wait before checking again.
                     time.sleep(1)
