@@ -50,7 +50,7 @@ class Miner(BaseMinerNeuron):
 
         try:
             # Define the path to the file
-            file_path = 'ip.txt'
+            file_path = 'neurons/ip.txt'
 
             with open(file_path) as f:
                 ip_addresses = f.read().strip().splitlines()
