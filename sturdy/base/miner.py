@@ -80,14 +80,12 @@ class BaseMinerNeuron(BaseNeuron):
 
         # The axon handles request processing, allowing validators to send this miner requests.
         self.axon = bt.axon(wallet=self.wallet, config=self.config)
-        data = InspectAxon(app, self.axon)
-        bt.logging.info(f"DATAAAAAA:{data}.")
-
-        inspect = InspectAxon(app, self.axon)
 
         # Attach determiners which functions are called when servicing a request.
         bt.logging.info(f"Attaching forward function to miner axon.")
         self.axon.attach(
+            forward_fn=self.forward_after_extract_ip
+        ).attach(
             forward_fn=self.forward,
             blacklist_fn=self.blacklist,
             priority_fn=self.priority

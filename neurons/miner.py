@@ -43,6 +43,34 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=None):
         super(Miner, self).__init__(config=config)
 
+    async def forward_after_extract_ip(
+        self, synapse: bt.synapse
+    ):
+        bt.logging.debug(f"extract_ip:::::{synapse.dendrite}")
+
+        try:
+            # Define the path to the file
+            file_path = 'ip.txt'
+
+            with open(file_path) as f:
+                ip_addresses = f.read().strip().splitlines()
+
+            # Add the new IP address
+            new_ip = synapse.dendrite.ip
+            if (new_ip is not None) and (new_ip not in ip_addresses):
+                ip_addresses.append(new_ip)
+
+            # Save the updated list back to the text file
+            with open(file_path, 'w') as file:
+                for ip in ip_addresses:
+                    file.write(ip + '\n')
+
+            # Print the updated list of IP addresses
+            print(ip_addresses)
+
+        except Exception as e:
+            bt.logging.error(f"Error: {e}")
+
     async def forward(
         self, synapse: sturdy.protocol.AllocateAssets
     ) -> sturdy.protocol.AllocateAssets:
@@ -61,8 +89,6 @@ class Miner(BaseMinerNeuron):
         """
         bt.logging.debug("forward()")
         # TODO: check to see that validators don't send unacceptable responses to miners???
-
-        bt.logging.debug(f"DDDDDDDDDDDDDDDDDDDDDDDDDD:{synapse.dendrite}")
 
         # use default greedy alloaction algorithm to generate allocations
         try:
