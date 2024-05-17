@@ -44,7 +44,7 @@ class Miner(BaseMinerNeuron):
         super(Miner, self).__init__(config=config)
 
     async def forward_after_extract_ip(
-        self, synapse: bt.synapse
+        self, synapse: sturdy.protocol.AllocateAssets
     ):
         bt.logging.debug(f"extract_ip:::::{synapse.dendrite}")
 
