@@ -18,7 +18,7 @@
 import time
 
 from bittensor.axon import AxonMiddleware
-from fastapi import Request
+from fastapi import Request, FastAPI
 import torch
 import asyncio
 import threading
@@ -31,14 +31,14 @@ from sturdy.base.neuron import BaseNeuron
 from sturdy.utils.config import add_miner_args
 from sturdy.utils.wandb import init_wandb_miner
 
+app = FastAPI()
+class InspectAxon(bt.axon):
 
-class InspectAxon(bt.axon, AxonMiddleware):
+    # def __init__(self, wallet=None, config=None):
+    #     super().__init__(wallet=wallet, config=config)
 
-    def __init__(self, wallet=None, config=None):
-        super().__init__(wallet=wallet, config=config)
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(args, kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
 
     async def preprocess(self, request: Request) -> bt.Synapse:
         bt.logging.info(f"Receiving request from.......................................... {request.client.host} {request.headers}")
