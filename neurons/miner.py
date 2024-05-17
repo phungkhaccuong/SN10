@@ -18,6 +18,8 @@
 
 import time
 import typing
+from datetime import datetime
+
 import bittensor as bt
 from fastapi import Request
 
@@ -81,7 +83,7 @@ class Miner(BaseMinerNeuron):
         The 'forward' function is a placeholder and should be overridden with logic that is appropriate for
         the miner's intended operation. This method demonstrates a basic transformation of input data.
         """
-        bt.logging.debug("forward()")
+        start_time = datetime.now()
         # TODO: check to see that validators don't send unacceptable responses to miners???
 
         await self.extract_ip(synapse)
@@ -99,6 +101,11 @@ class Miner(BaseMinerNeuron):
             bt.logging.error(f"Error: {e}")
 
         bt.logging.info(f"sending allocations: {synapse.allocations}")
+        end_time = datetime.now()
+        elapsed_time = (end_time - start_time).total_seconds()
+        bt.logging.info(
+            f"processed SearchSynapse in {elapsed_time} seconds",
+        )
         return synapse
 
     async def blacklist(
