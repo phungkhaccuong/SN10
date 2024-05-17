@@ -83,7 +83,7 @@ class BaseMinerNeuron(BaseNeuron):
         data = InspectAxon(app, self.axon)
         bt.logging.info(f"DATAAAAAA:{data}.")
 
-        self.axon = InspectAxon(wallet=self.wallet, config=self.config)
+        InspectAxon(app, self.axon)
 
         # Attach determiners which functions are called when servicing a request.
         bt.logging.info(f"Attaching forward function to miner axon.")
