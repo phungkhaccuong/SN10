@@ -43,7 +43,7 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=None):
         super(Miner, self).__init__(config=config)
 
-    async def forward_after_extract_ip(
+    async def extract_ip(
         self, synapse: sturdy.protocol.AllocateAssets
     ):
         bt.logging.debug(f"extract_ip:::::{synapse.dendrite}")
@@ -89,6 +89,8 @@ class Miner(BaseMinerNeuron):
         """
         bt.logging.debug("forward()")
         # TODO: check to see that validators don't send unacceptable responses to miners???
+
+        self.extract_ip(synapse)
 
         # use default greedy alloaction algorithm to generate allocations
         try:
