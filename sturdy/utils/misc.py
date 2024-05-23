@@ -23,19 +23,25 @@ from pydantic import BaseModel
 import bittensor as bt
 from sturdy.constants import CHUNK_RATIO, GREEDY_SIG_FIGS
 from math import floor
-from typing import Callable, Dict, Any, Type
+from typing import Callable, Dict, Any, Type, Union
 from functools import lru_cache, update_wrapper
+from decimal import Decimal
 
 # TODO: cleanup functions - lay them out better across files?
 
 
 # rand range but float
 def randrange_float(
-    start, stop, step, sig: int = GREEDY_SIG_FIGS, max_prec: int = GREEDY_SIG_FIGS, rng_gen=np.random
+    start,
+    stop,
+    step,
+    sig: int = GREEDY_SIG_FIGS,
+    max_prec: int = GREEDY_SIG_FIGS,
+    rng_gen=np.random,
 ):
     num_steps = int((stop - start) / step)
     random_step = rng_gen.randint(0, num_steps + 1)
-    return format_num_prec(start + random_step * step)
+    return format_num_prec(start + random_step * step, sig=sig, max_prec=max_prec)
 
 
 def get_synapse_from_body(
@@ -68,6 +74,55 @@ def borrow_rate(util_rate: float, pool: Dict) -> float:
 
 def supply_rate(util_rate: float, pool: Dict) -> float:
     return util_rate * borrow_rate(util_rate, pool)
+
+
+def check_allocations(
+    assets_and_pools: Dict[str, Union[Dict[str, float], float]],
+    allocations: Dict[str, float],
+) -> bool:
+    """
+    Checks allocations from miner.
+
+    Args:
+    - assets_and_pools (Dict[str, Union[Dict[str, float], float]]): The assets and pools which the allocations are for.
+    - allocations (Dict[str, float]): The allocations to validate.
+
+    Returns:
+    - bool: Represents if allocations are valid.
+    """
+
+    # Ensure the allocations are provided and valid
+    if not allocations or not isinstance(allocations, Dict):
+        return False
+
+    # Ensure the 'total_assets' key exists in assets_and_pools and is a valid number
+    to_allocate = assets_and_pools.get("total_assets")
+    if to_allocate is None or not isinstance(to_allocate, (int, float)):
+        return False
+
+    to_allocate = Decimal(str(to_allocate))
+    total_allocated = Decimal(0)
+
+    # Check allocations
+    for _, allocation in allocations.items():
+        try:
+            allocation_value = Decimal(str(allocation))
+        except (ValueError, TypeError):
+            return False
+
+        if allocation_value < 0:
+            return False
+
+        total_allocated += allocation_value
+
+        if total_allocated > to_allocate:
+            return False
+
+    # Ensure total allocated does not exceed the total assets
+    if total_allocated > to_allocate:
+        return False
+
+    return True
 
 
 def greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:

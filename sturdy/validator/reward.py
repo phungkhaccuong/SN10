@@ -21,12 +21,11 @@ import math
 
 import bittensor as bt
 import torch
-from typing import List, Dict, Tuple
-from decimal import Decimal
+from typing import List, Dict, Tuple, Any, Union
 import copy
 
 from sturdy.constants import QUERY_TIMEOUT, STEEPNESS, DIV_FACTOR, NUM_POOLS
-from sturdy.utils.misc import supply_rate
+from sturdy.utils.misc import supply_rate, check_allocations
 from sturdy.protocol import AllocInfo
 
 
@@ -94,6 +93,36 @@ def reward(
     )
 
 
+def calculate_aggregate_apy(
+    allocations: Dict[str, float],
+    assets_and_pools: Dict[str, Union[Dict[str, float], float]],
+    timesteps: int,
+    pool_history: Dict[str, Dict[str, Any]],
+):
+    """
+    Calculates aggregate yields given intial assets and pools, pool history, and number of timesteps
+    """
+
+    # calculate aggregate yield
+    initial_balance = assets_and_pools["total_assets"]
+    pct_yield = 0
+    for pools in pool_history:
+        curr_yield = 0
+        for uid, allocs in allocations.items():
+            pool_data = pools[uid]
+            util_rate = pool_data["borrow_amount"] / pool_data["reserve_size"]
+            pool_yield = allocs * supply_rate(util_rate, assets_and_pools["pools"][uid])
+            curr_yield += pool_yield
+        pct_yield += curr_yield
+
+    pct_yield /= initial_balance
+    aggregate_apy = (
+        pct_yield / timesteps
+    ) * 365  # for simplicity each timestep is a day in the simulator
+
+    return aggregate_apy
+
+
 def get_rewards(
     self,
     query: int,
@@ -109,6 +138,7 @@ def get_rewards(
 
     Returns:
     - torch.FloatTensor: A tensor of rewards for the given query and responses.
+    - allocs: miner allocations along with their respective yields
     """
 
     # maximum yield to scale all rewards by
@@ -124,34 +154,15 @@ def get_rewards(
 
         allocations = response.allocations
 
-        if allocations is None:
-            apys[uids[response_idx]] = sys.float_info.min
-            continue
+        # validator miner allocations before running simulation
+        # is the miner cheating w.r.t allocations?
+        cheating = True
+        try:
+            cheating = not check_allocations(init_assets_and_pools, allocations)
+        except Exception as e:
+            bt.logging.error(e)
 
-        self.simulator.init_data(copy.deepcopy(init_assets_and_pools), allocations)
-
-        # update reserves given allocations
-        # self.simulator.allocations = allocations
-        self.simulator.update_reserves_with_allocs()
-        # TODO: use this or just run reset()?
-        updated_assets_pools = copy.deepcopy(self.simulator.assets_and_pools)
-
-        initial_balance = updated_assets_pools["total_assets"]
-        total_allocated = Decimal(0)
-        cheating = False
-
-        for _, allocation in allocations.items():
-            total_allocated += Decimal(
-                str(allocation)
-            )  # This should fix precision issues with python floats
-
-            # score response very low if miner is cheating somehow
-            if total_allocated > initial_balance:
-                cheating = True
-                break
-
-        # punish if miner they're cheating
-        # TODO: create a more forgiving penalty system?
+        # score response very low if miner is cheating somehow or returns allocations with incorrect format
         if cheating:
             miner_uid = uids[response_idx]
             bt.logging.warning(
@@ -160,24 +171,29 @@ def get_rewards(
             apys[miner_uid] = sys.float_info.min
             continue
 
-        # run simulation
-        self.simulator.run()
-        # calculate aggregate yield
-        pct_yield = 0
-        for pools in self.simulator.pool_history:
-            curr_yield = 0
-            for uid, pool_data in pools.items():
-                util_rate = pool_data["borrow_amount"] / pool_data["reserve_size"]
-                pool_yield = allocations[uid] * supply_rate(
-                    util_rate, self.simulator.assets_and_pools["pools"][uid]
-                )
-                curr_yield += pool_yield
-            pct_yield += curr_yield
+        # miner does not appear to be cheating - so we init simulator data
+        self.simulator.init_data(copy.deepcopy(init_assets_and_pools), allocations)
 
-        pct_yield /= initial_balance
-        aggregate_apy = (
-            pct_yield / self.simulator.timesteps
-        ) * 365  # for simplicity each timestep is a day in the simulator
+        # update reserves given allocations
+        try:
+            self.simulator.update_reserves_with_allocs()
+        except Exception as e:
+            bt.logging.error(e)
+            bt.logging.error(
+                "Failed to update reserves with miner allocations - PENALIZING MINER"
+            )
+            miner_uid = uids[response_idx]
+            apys[miner_uid] = sys.float_info.min
+            continue
+
+        self.simulator.run()
+
+        aggregate_apy = calculate_aggregate_apy(
+            allocations,
+            init_assets_and_pools,
+            self.simulator.timesteps,
+            self.simulator.pool_history,
+        )
 
         if aggregate_apy > max_apy:
             max_apy = aggregate_apy
@@ -200,11 +216,11 @@ def get_rewards(
         # TODO: cleaner way to do this?
         if responses[idx].allocations is None or axon_times[uids[idx]] >= QUERY_TIMEOUT:
             continue
-        if len(responses[idx].allocations) == len(updated_assets_pools["pools"]):
-            allocs[uids[idx]] = {
-                "apy": apys[uids[idx]],
-                "allocations": responses[idx].allocations,
-            }
+
+        allocs[uids[idx]] = {
+            "apy": apys[uids[idx]],
+            "allocations": responses[idx].allocations,
+        }
 
     sorted_apys = {
         k: v for k, v in sorted(apys.items(), key=lambda item: item[1], reverse=True)
