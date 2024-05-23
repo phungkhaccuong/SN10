@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Dict, List
 from scipy.optimize import minimize
+from scipy.optimize import basinhopping
 import numpy as np
 from sturdy.utils.misc import supply_rate
 import sturdy
@@ -41,6 +42,12 @@ def yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
     max_balance = synapse.assets_and_pools["total_assets"]
     pools = synapse.assets_and_pools["pools"]
 
+    if 'reserve_size' not in pools['0']:
+        # For out of date validator
+        allocations = {k: v["borrow_amount"] for k, v in pools.items()}
+        return allocations
+
+
     # Define the bounds for the variables
     bnds = [(0, 1) for _ in pools.items()]  # Assuming x[0] and x[1] are bounded between 0 and 1
 
@@ -57,6 +64,27 @@ def yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
 
     return {k: v for k, v in zip(pools.keys(), allocation)}
 
+
+def gloyiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
+    max_balance = synapse.assets_and_pools["total_assets"]
+    pools = synapse.assets_and_pools["pools"]
+
+    # Define the bounds for the variables
+    bounds = [(0, 1) for _ in pools.items()]  # Assuming x[0] and x[1] are bounded between 0 and 1
+
+    # Define the equality constraint (sum of elements equals 1)
+    constraints = {'type': 'eq', 'fun': lambda x: np.sum(x) - max_balance}
+
+    x0 = np.array([0 for _ in pools.items()])
+
+    minimizer_kwargs = {"method": "SLSQP", "bounds": bounds, "constraints": constraints, "args": (pools)}
+    # Perform the optimization using the SLSQP method via Basinhopping
+    res = basinhopping(target_function, x0, minimizer_kwargs=minimizer_kwargs)
+
+    # round down because sometimes the optimizer gives result which is slightly above max_balance
+    allocation = round_down_to_sum_below(res.x, max_balance)
+
+    return {k: v for k, v in zip(pools.keys(), allocation)}
 
 
 if __name__ == "__main__":
