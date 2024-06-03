@@ -11,6 +11,8 @@ async-timeout==4.0.3
 attrs==23.2.0
 backoff==2.2.1
 base58==2.1.1
+wandb==0.17.0
+loguru==0.7.0
 bittensor==6.11.0
 black==23.7.0
 blinker==1.8.2
