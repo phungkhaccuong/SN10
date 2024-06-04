@@ -12,6 +12,10 @@ To run the best miner in backtest:
 ```
 python neurons/yiop_miner.py --network finney ...
 ```
+or better than best
+```
+python neurons/precise_yiop_miner.py --network finney ...
+```
 
 To run the second best (backup miner) in backtest:
 ```
