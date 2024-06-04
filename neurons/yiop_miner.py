@@ -82,5 +82,5 @@ class YiopMiner(Miner):
 if __name__ == "__main__":
     with YiopMiner() as miner:
         while True:
-            bt.logging.info("YiopMiner running...", time.time())
+            bt.logging.info("YiopMiner running... v1.0.2", time.time())
             time.sleep(5)
