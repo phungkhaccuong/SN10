@@ -193,15 +193,15 @@ def yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
 
 
     # Define the bounds for the variables
-    bnds = [(0, max_balance) for _ in pools.items()]  # Assuming x[0] and x[1] are bounded between 0 and 1
+    bnds = [(0, max_balance) for _ in pools.items()]  # Assuming x[0] and x[1] are bounded between 0 and max_balance
 
-    # Define the equality constraint (sum of elements equals 1)
+    # Define the equality constraint (sum of elements equals max_balance)
     cons = {'type': 'eq', 'fun': lambda x: np.sum(x) - max_balance}
 
     x0 = np.array([0 for _ in pools.items()])
 
     # Perform the optimization using the SLSQP method which supports constraints
-    res = minimize(target_function, x0, args=(pools), method='SLSQP', constraints=cons, bounds=bnds, options={'ftol': 1e-20})
+    res = minimize(target_function, x0, args=(pools), method='SLSQP', constraints=cons, bounds=bnds)
 
     # round down because sometimes the optimizer gives result which is slightly above max_balance
     allocation = round_down_to_sum_below(res.x, max_balance)
