@@ -68,7 +68,7 @@ class YiopMiner(Miner):
 
         # use default greedy alloaction algorithm to generate allocations
         try:
-            synapse.allocations = yiop_allocation_algorithm(synapse)
+            synapse.allocations = yiop_allocation_algorithm(synapse.assets_and_pools["total_assets"], synapse.assets_and_pools["pools"])
         except Exception as e:
             bt.logging.error(f"Error: {e}")
 
