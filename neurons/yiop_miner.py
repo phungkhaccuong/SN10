@@ -62,6 +62,8 @@ class YiopMiner(Miner):
         The 'forward' function is a placeholder and should be overridden with logic that is appropriate for
         the miner's intended operation. This method demonstrates a basic transformation of input data.
         """
+        start_time = time.perf_counter()
+
         bt.logging.debug("forward()")
 
         # use default greedy alloaction algorithm to generate allocations
@@ -71,6 +73,8 @@ class YiopMiner(Miner):
             bt.logging.error(f"Error: {e}")
 
         bt.logging.info(f"sending allocations: {synapse.allocations}")
+        end_time = time.perf_counter()
+        bt.logging.info(f"Elapsed time ::::::::::::::::::::: {(end_time - start_time) * 1000} milliseconds")
         return synapse
 
 
