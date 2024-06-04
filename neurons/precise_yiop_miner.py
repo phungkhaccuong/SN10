@@ -25,10 +25,10 @@ from neurons.miner import Miner
 import sturdy
 
 # import base miner class which takes care of most of the boilerplate
-from sturdy.utils.yiop import yiop_allocation_algorithm
+from sturdy.utils.yiop import precise_yiop_allocation_algorithm, yiop_allocation_algorithm
 
 
-class YiopMiner(Miner):
+class PreciseYiopMiner(Miner):
     """
     Your miner neuron class. You should use this class to define your miner's behavior. In particular, you should replace the
     forward function with your own logic. You may also want to override the blacklist and priority functions according to your
@@ -43,7 +43,7 @@ class YiopMiner(Miner):
     """
 
     def __init__(self, config=None):
-        super(YiopMiner, self).__init__(config=config)
+        super(PreciseYiopMiner, self).__init__(config=config)
 
     async def forward(
         self, synapse: sturdy.protocol.AllocateAssets
@@ -68,7 +68,7 @@ class YiopMiner(Miner):
 
         # use default greedy alloaction algorithm to generate allocations
         try:
-            synapse.allocations = yiop_allocation_algorithm(synapse)
+            synapse.allocations = precise_yiop_allocation_algorithm(synapse)
         except Exception as e:
             bt.logging.error(f"Error: {e}")
 
@@ -80,7 +80,7 @@ class YiopMiner(Miner):
 
 # This is the main function, which runs the miner.
 if __name__ == "__main__":
-    with YiopMiner() as miner:
+    with PreciseYiopMiner() as miner:
         while True:
-            bt.logging.info("YiopMiner running... v1.0.2", time.time())
+            bt.logging.info("PreciseYiopMiner running... v1.0.2", time.time())
             time.sleep(5)

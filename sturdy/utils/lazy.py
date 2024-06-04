@@ -127,6 +127,17 @@ def sorted_greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) 
     return current_allocations
 
 
+def equity_greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
+    max_balance = synapse.assets_and_pools["total_assets"]
+    balance = max_balance
+    pools = synapse.assets_and_pools["pools"]
+
+    # how much of our assets we have allocated
+    current_allocations = {k: max_balance / len(pools) for k, _ in pools.items()}
+
+    return current_allocations
+
+
 def equal_greedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
     max_balance = synapse.assets_and_pools["total_assets"]
     balance = max_balance
