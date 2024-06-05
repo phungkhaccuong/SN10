@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
@@ -72,7 +74,11 @@ func main() {
 		reqBody := c.Body()
 
 		// Use the raw request body as the cache key
-		cacheKey := string(reqBody)
+		// cacheKey := string(reqBody)
+
+		// Hash the request body to create a Redis key
+		hash := sha256.Sum256(reqBody)
+		cacheKey := hex.EncodeToString(hash[:])
 
 		// Check if response is in cache
 		cacheResponse, err := rdb.Get(ctx, cacheKey).Result()
