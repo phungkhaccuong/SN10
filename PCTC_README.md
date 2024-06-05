@@ -27,3 +27,12 @@ python neurons/equal_miner.py --network finney ...
 ```
 pip install -e .
 ```
+
+# Running Go Server
+
+```
+export CGO_CFLAGS="-I$(python3-config --includes)"
+export CGO_LDFLAGS="-L$(python3-config --ldflags)"
+```
+
+For MacOS: `arch -arm64 brew install pkg-config`
