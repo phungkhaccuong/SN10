@@ -37,3 +37,8 @@ cd goserver
 go mod tidy
 go build fserver.go
 ```
+
+# To test performance
+```
+wrk -t1 -c1 -d10s -s request.lua http://160.202.129.73:10203/AllocateAssets
+```
