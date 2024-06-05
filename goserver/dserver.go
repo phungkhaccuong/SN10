@@ -69,7 +69,7 @@ func main() {
 	app.Post("/AllocateAssets", func(c *fiber.Ctx) error {
 		ip := c.IP()
 		path := c.Path()
-		log.Printf("IP: %s, Path: %s\n", ip, path)
+		log.Printf("Received request IP: %s, Path: %s\n", ip, path)
 
 		// Forward the request to another server
 		forwardURL := fmt.Sprintf("http://%s:%s/AllocateAssets", *fwdHost, *fwdPort)
@@ -112,7 +112,7 @@ func main() {
 		}
 
 		// Cache the response
-		err = rdb.Set(ctx, cacheKey, body, 5*time.Minute).Err()
+		err = rdb.Set(ctx, cacheKey, body, 10*time.Minute).Err()
 		if err != nil {
 			log.Printf("IP: %s, Path: %s. ERROR: Cannot cache response: %s\n", ip, path, err)
 		}

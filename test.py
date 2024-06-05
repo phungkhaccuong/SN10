@@ -63,8 +63,10 @@ async def request_park():
         "computed_body_hash" : "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"
     }
     print(f'body contains: {len(str(body))}')
+    phu_url = 'http://10.0.0.212:8888/generate'
+    local_url = 'http://localhost:3001/AllocateAssets'
     # resp = requests.post('http://160.202.129.73:3000/AllocateAssets', headers=headers, json=body)
-    resp = requests.post('http://localhost:3001/AllocateAssets', headers=headers, json=body)
+    resp = requests.post(local_url, headers=headers, json=body)
     print(resp.status_code)
     print(resp.json())
 
