@@ -93,7 +93,7 @@ func main() {
 		reqBody := c.Body()
 
 		// Print the body
-		fmt.Printf("Request Body: %s\n", string(reqBody))
+		log.Printf("Request Body: %s\n", string(reqBody))
 
 		// Use the raw request body as the cache key
 		// cacheKey := string(reqBody)
