@@ -9,10 +9,6 @@ import sturdy
 from sturdy.validator.reward import calculate_aggregate_apy
 from sturdy.validator.simulator import Simulator
 
-import bittensor as bt
-
-from redis import StrictRedis
-from redis_cache import RedisCache
 
 def target_function(x, pools):
     pool_items = [pool for idx, pool in pools.items()]
