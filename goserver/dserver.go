@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -44,6 +45,21 @@ type FinalResponse struct {
 	Name        string             `json:"name"`
 }
 
+func hashObject(obj interface{}) (string, error) {
+	// Serialize the object to JSON
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	// Compute the SHA-256 hash
+	hash := sha256.Sum256(data)
+
+	// Convert the hash to a hexadecimal string
+	hashStr := hex.EncodeToString(hash[:])
+	return hashStr, nil
+}
+
 func main() {
 	// Define the port flag
 	port := flag.String("port", "3001", "Port to run the Fiber app on")
@@ -78,9 +94,27 @@ func main() {
 		// Use the raw request body as the cache key
 		// cacheKey := string(reqBody)
 
+		// TODO: this does not work because of nonce field
 		// Hash the request body to create a Redis key
-		hash := sha256.Sum256(reqBody)
-		cacheKey := hex.EncodeToString(hash[:])
+		// hash := sha256.Sum256(reqBody)
+		// cacheKey := hex.EncodeToString(hash[:])
+
+		// Parse the JSON request body into the InputRequest struct
+		req := new(InputRequest)
+		if err := c.BodyParser(req); err != nil {
+			log.Printf("IP: %s, Path: %s. ERROR: Cannot parse JSON from body: %s\n", ip, path, c.Body())
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Cannot parse JSON",
+			})
+		}
+		// Hash the request object to create a Redis key
+		cacheKey, err := hashObject(req)
+		if err != nil {
+			log.Printf("IP: %s, Path: %s. ERROR: Cannot hash request object: %s\n", ip, path, err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Cannot hash request object",
+			})
+		}
 
 		// Check if response is in cache
 		cacheResponse, err := rdb.Get(ctx, cacheKey).Result()
