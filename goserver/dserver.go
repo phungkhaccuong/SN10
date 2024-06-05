@@ -49,6 +49,8 @@ func main() {
 	port := flag.String("port", "3001", "Port to run the Fiber app on")
 	redisPort := flag.String("redis.port", "6379", "Port to run the Redis server on")
 	redisHost := flag.String("redis.host", "localhost", "Port to run the Redis server on")
+	fwdHost := flag.String("fwd.host", "localhost", "Host to forward requests to")
+	fwdPort := flag.String("fwd.port", "3000", "Port to forward requests to")
 
 	// Parse the command-line flags
 	flag.Parse()
@@ -70,7 +72,7 @@ func main() {
 		log.Printf("IP: %s, Path: %s\n", ip, path)
 
 		// Forward the request to another server
-		forwardURL := "http://localhost:3000/AllocateAssets" // Change this to the actual URL of the server you want to forward to
+		forwardURL := fmt.Sprintf("http://%s:%s/AllocateAssets", *fwdHost, *fwdPort)
 		reqBody := c.Body()
 
 		// Use the raw request body as the cache key
@@ -122,5 +124,6 @@ func main() {
 	// Start the server on port 3000
 	log.Printf("Starting server on port %s...", *port)
 	log.Printf("Redis server %s:%s...", *redisHost, *redisPort)
+	log.Printf("Forwarding destination %s:%s...", *fwdHost, *fwdPort)
 	log.Fatal(app.Listen(fmt.Sprintf(":%s", *port)))
 }
