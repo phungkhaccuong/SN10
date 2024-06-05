@@ -75,6 +75,7 @@ func waitForResponse(c *fiber.Ctx, key string, rdb *redis.Client) error {
 		}
 
 		log.Printf("Response from cached after waiting for lock")
+		c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 		// Write the cached response
 		return c.SendString(res)
 	}
@@ -158,6 +159,7 @@ func main() {
 		cacheResponse, err := rdb.Get(ctx, "response:"+cacheKey).Result()
 		if err == nil {
 			log.Printf("IP: %s, Path: %s. Cache hit\n", ip, path)
+			c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 			return c.SendString(cacheResponse)
 		}
 
@@ -190,6 +192,7 @@ func main() {
 		}
 
 		log.Printf("IP: %s, Path: %s. Forwarded request successfully\n", ip, path)
+		c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 		return c.Send(body)
 	})
 
