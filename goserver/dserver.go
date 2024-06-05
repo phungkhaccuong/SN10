@@ -53,13 +53,14 @@ func hashObject(obj interface{}) (string, error) {
 		return "", err
 	}
 
-	// log.Printf("String to hash: %s\n", string(data))
+	log.Printf("String to hash: %s\n", string(data))
 
 	// Compute the SHA-256 hash
 	hash := sha256.Sum256(data)
 
 	// Convert the hash to a hexadecimal string
 	hashStr := hex.EncodeToString(hash[:])
+	log.Printf("Key: %s\n", hashStr)
 	return hashStr, nil
 }
 
