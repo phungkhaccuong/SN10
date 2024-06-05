@@ -13,9 +13,6 @@ import bittensor as bt
 
 from redis import StrictRedis
 from redis_cache import RedisCache
-client = StrictRedis(host="localhost", decode_responses=True)
-cache = RedisCache(redis_client=client)
-
 
 def target_function(x, pools):
     pool_items = [pool for idx, pool in pools.items()]
@@ -216,11 +213,9 @@ def precise_yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -
     return {k: v for k, v in zip(pools.keys(), allocation)}
 
 
-@cache.cache(ttl=60)
-def yiop_allocation_algorithm(total_assets, pools) -> Dict:
-    bt.logging.info(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NO CACHE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    max_balance = total_assets
-    pools = pools
+def yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
+    max_balance = synapse.assets_and_pools["total_assets"]
+    pools = synapse.assets_and_pools["pools"]
 
     if 'reserve_size' not in pools['0']:
         # For out of date validator
