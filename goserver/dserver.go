@@ -74,6 +74,7 @@ func waitForResponse(c *fiber.Ctx, key string, rdb *redis.Client) error {
 			return c.Status(fiber.StatusInternalServerError).SendString("Error communicating with Redis")
 		}
 
+		log.Printf("Response from cached after waiting for lock")
 		// Write the cached response
 		return c.SendString(res)
 	}
