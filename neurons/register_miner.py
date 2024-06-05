@@ -22,8 +22,8 @@ class RegisterMiner(Miner):
         bt.logging.info(
             f"Serving miner axon {self.axon} on network: {self.config.subtensor.chain_endpoint} with netuid: {self.config.netuid}"
         )
-        # self.axon.serve(netuid=self.config.netuid, subtensor=self.subtensor)
-        self.axon.start()
+        self.axon.serve(netuid=self.config.netuid, subtensor=self.subtensor)
+        # self.axon.start()
 
         bt.logging.info(f"Miner registered and starting at block: {self.block}, exiting now")
 
