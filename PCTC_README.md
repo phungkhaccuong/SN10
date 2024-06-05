@@ -36,3 +36,9 @@ export CGO_LDFLAGS="-L$(python3-config --ldflags)"
 ```
 
 For MacOS: `arch -arm64 brew install pkg-config`
+
+# Run miner endpoint
+```
+pm2 start miner_endpoint.py --name miner_endpoint --interpreter python3 -- \
+--port 8888
+```
