@@ -53,15 +53,30 @@ func hashObject(obj interface{}) (string, error) {
 		return "", err
 	}
 
-	log.Printf("String to hash: %s\n", string(data))
+	// log.Printf("String to hash: %s\n", string(data))
 
 	// Compute the SHA-256 hash
 	hash := sha256.Sum256(data)
 
 	// Convert the hash to a hexadecimal string
 	hashStr := hex.EncodeToString(hash[:])
-	log.Printf("Key: %s\n", hashStr)
+	// log.Printf("Key: %s\n", hashStr)
 	return hashStr, nil
+}
+
+func waitForResponse(c *fiber.Ctx, key string, rdb *redis.Client) error {
+	for {
+		res, err := rdb.Get(ctx, "response:"+key).Result()
+		if err == redis.Nil {
+			time.Sleep(50 * time.Millisecond) // Polling interval, adjust as needed
+			continue
+		} else if err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Error communicating with Redis")
+		}
+
+		// Write the cached response
+		return c.SendString(res)
+	}
 }
 
 func main() {
@@ -96,7 +111,7 @@ func main() {
 		reqBody := c.Body()
 
 		// Print the body
-		log.Printf("Request Body: %s\n", string(reqBody))
+		// log.Printf("Request Body: %s\n", string(reqBody))
 
 		// Use the raw request body as the cache key
 		// cacheKey := string(reqBody)
@@ -123,8 +138,23 @@ func main() {
 			})
 		}
 
+		redisKey := "lock:" + cacheKey
+		// Try to acquire the lock in Redis
+		lock, err := rdb.SetNX(ctx, redisKey, "locked", 10*time.Second).Result()
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Error communicating with Redis")
+		}
+
+		if !lock {
+			// If lock is not acquired, wait for the existing request to complete
+			return waitForResponse(c, cacheKey, rdb)
+		}
+
+		// If lock is acquired, process the request
+		defer rdb.Del(ctx, redisKey) // Release the lock when done
+
 		// Check if response is in cache
-		cacheResponse, err := rdb.Get(ctx, cacheKey).Result()
+		cacheResponse, err := rdb.Get(ctx, "response:"+cacheKey).Result()
 		if err == nil {
 			log.Printf("IP: %s, Path: %s. Cache hit\n", ip, path)
 			return c.SendString(cacheResponse)
@@ -153,7 +183,7 @@ func main() {
 		}
 
 		// Cache the response
-		err = rdb.Set(ctx, cacheKey, body, 10*time.Minute).Err()
+		err = rdb.Set(ctx, "response:"+cacheKey, body, 10*time.Minute).Err()
 		if err != nil {
 			log.Printf("IP: %s, Path: %s. ERROR: Cannot cache response: %s\n", ip, path, err)
 		}
