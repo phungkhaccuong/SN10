@@ -138,7 +138,6 @@ typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_ext
 tzdata==2024.1
 urllib3==2.2.1
 uvicorn==0.22.0
-wandb==0.16.0
 wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_1704731205417/work
 websocket-client==1.8.0
 Werkzeug==3.0.3
