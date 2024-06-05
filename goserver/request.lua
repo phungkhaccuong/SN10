@@ -102,7 +102,7 @@ json_input = [[
     "large": "PLACEHOLDER"
 }
 ]]
-local large_string = string.rep("a", 100000)
+local large_string = string.rep("a", 1)
 wrk.body = json_input:gsub('"PLACEHOLDER"', '"' .. large_string .. '"')
 local headers = {
     ["content-type"] = "application/json",

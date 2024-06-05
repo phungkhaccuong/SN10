@@ -53,6 +53,8 @@ func hashObject(obj interface{}) (string, error) {
 		return "", err
 	}
 
+	// log.Printf("String to hash: %s\n", string(data))
+
 	// Compute the SHA-256 hash
 	hash := sha256.Sum256(data)
 
@@ -105,7 +107,7 @@ func main() {
 
 		// Parse the JSON request body into the InputRequest struct
 		req := new(InputRequest)
-		if err := c.BodyParser(req); err != nil {
+		if err := json.Unmarshal(reqBody, req); err != nil {
 			log.Printf("IP: %s, Path: %s. ERROR: Cannot parse JSON from body: %s\n", ip, path, c.Body())
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Cannot parse JSON",
