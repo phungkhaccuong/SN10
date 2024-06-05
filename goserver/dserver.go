@@ -27,6 +27,7 @@ type Pool struct {
 	KinkSlope       float64 `json:"kink_slope"`
 	OptimalUtilRate float64 `json:"optimal_util_rate"`
 	BorrowAmount    float64 `json:"borrow_amount"`
+	ReserveSize     float64 `json:"reserve_size"`
 }
 
 type InputRequest struct {
