@@ -68,7 +68,7 @@ func waitForResponse(c *fiber.Ctx, key string, rdb *redis.Client) error {
 	for {
 		res, err := rdb.Get(ctx, "response:"+key).Result()
 		if err == redis.Nil {
-			time.Sleep(50 * time.Millisecond) // Polling interval, adjust as needed
+			time.Sleep(20 * time.Millisecond) // Polling interval, adjust as needed
 			continue
 		} else if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Error communicating with Redis")
