@@ -66,8 +66,9 @@ async def request_park():
     phu_url = 'http://10.0.0.212:8888/generate'
     local_url = 'http://localhost:3001/AllocateAssets'
     cuong_url = 'http://160.202.130.57:9001/AllocateAssets'
+    top_url = 'http://81.16.177.201:21179/AllocateAssets'
     # resp = requests.post('http://160.202.129.73:3000/AllocateAssets', headers=headers, json=body)
-    resp = requests.post(local_url, headers=headers, json=body)
+    resp = requests.post(top_url, headers=headers, json=body)
     print(resp.status_code)
     print(resp.json())
 

@@ -12,7 +12,7 @@ It comes with a function to plot pool borrow rates, etc. over timestamps
 """
 
 
-def plot_simulation_results(simulator):
+def plot_simulation_results(simulator, num_pools=NUM_POOLS):
     borrow_amount_history = []
     borrow_rate_history = []
     utilization_rate_history = []
@@ -118,7 +118,7 @@ def plot_simulation_results(simulator):
 
     # Plot interest rate curves for the pools
     utilization_range = np.linspace(0, 1, 100)
-    for i in range(NUM_POOLS):
+    for i in range(num_pools):
         interest_rates = [
             borrow_rate(u, simulator.assets_and_pools["pools"][str(i)])
             for u in utilization_range
@@ -143,7 +143,7 @@ for i in range(num_sims):
         seed=np.random.randint(0, 1000),
     )
     sim.initialize()
-    sim.init_data()
+    sim.init_data(num_pools=2)
     sim.run()
 
-    plot_simulation_results(sim)
+    plot_simulation_results(sim, num_pools=2)
