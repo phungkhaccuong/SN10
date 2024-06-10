@@ -8,7 +8,11 @@ python neurons/miner.py --network finney ...
 ```
 
 To run the best miner in backtest:
+```
+python neurons/sim_miner.py --network finney ...
+```
 
+Old miner:
 ```
 python neurons/yiop_miner.py --network finney ...
 ```
