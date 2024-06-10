@@ -34,6 +34,7 @@ class Simulator(object):
         self,
         init_assets_and_pools: Dict[str, Union[Dict[str, float], float]] = None,
         init_allocations: Dict[str, float] = None,
+        num_pools=NUM_POOLS
     ):
         if self.rng_state_container is None or self.init_rng is None:
             raise RuntimeError(
@@ -42,7 +43,7 @@ class Simulator(object):
 
         if init_assets_and_pools is None:
             self.assets_and_pools = generate_assets_and_pools(
-                rng_gen=self.rng_state_container
+                rng_gen=self.rng_state_container, num_pools=num_pools
             )
         else:
             self.assets_and_pools = init_assets_and_pools
@@ -146,6 +147,9 @@ class Simulator(object):
 
         new_pool_data = {
             pool_uids[i]: {
+                "noise": noise[i],
+                "curr_borrow_rate": curr_borrow_rates[i],
+                "rate_change": rate_changes[i],
                 "borrow_amount": amounts[i],
                 "reserve_size": curr_reserve_sizes[i],
                 "borrow_rate": borrow_rate(

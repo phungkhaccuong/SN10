@@ -22,7 +22,7 @@ import numpy as np
 
 
 # TODO: add different interest rate models in the future - we use a single simple model for now
-def generate_assets_and_pools(rng_gen=np.random) -> typing.Dict:  # generate pools
+def generate_assets_and_pools(rng_gen=np.random, num_pools=NUM_POOLS) -> typing.Dict:  # generate pools
     assets_and_pools = {}
     pools = {
         str(x): {
@@ -47,7 +47,7 @@ def generate_assets_and_pools(rng_gen=np.random) -> typing.Dict:  # generate poo
             ),  # initial borrowed amount from pool
             "reserve_size": POOL_RESERVE_SIZE,
         }
-        for x in range(NUM_POOLS)
+        for x in range(num_pools)
     }
 
     assets_and_pools["total_assets"] = TOTAL_ASSETS
