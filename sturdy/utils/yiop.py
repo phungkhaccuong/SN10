@@ -101,19 +101,6 @@ def fine_yiop_target_function(x, assets_and_pools, timesteps, pool_history):
     return calculate_aggregate_apy(allocation, assets_and_pools, timesteps, pool_history)
 
 
-def simulated_yiop_target_function(x, assets_and_pools):
-    pools = assets_and_pools['pools']
-    allocation = {k: v for k, v in zip(pools.keys(), x)}
-    simulator = Simulator()
-    simulator.initialize()
-    simulator.reset()
-    simulator.init_data(copy.deepcopy(assets_and_pools), allocation)
-    simulator.update_reserves_with_allocs()
-    simulator.run()
-
-    return calculate_aggregate_apy(allocation, assets_and_pools, simulator.timesteps, simulator.pool_history)
-
-
 def fine_yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
     max_balance = synapse.assets_and_pools["total_assets"]
     pools = synapse.assets_and_pools["pools"]
@@ -148,33 +135,6 @@ def fine_yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> D
 
     x0 = res.x
     res = minimize(fine_yiop_target_function, x0, args=(synapse.assets_and_pools, simulator.timesteps, simulator.pool_history), method='SLSQP', constraints=cons, bounds=bnds)
-
-    # round down because sometimes the optimizer gives result which is slightly above max_balance
-    allocation = round_down_to_sum_below(res.x, max_balance)
-
-    return {k: v for k, v in zip(pools.keys(), allocation)}
-
-
-def simulated_yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
-    max_balance = synapse.assets_and_pools["total_assets"]
-    pools = synapse.assets_and_pools["pools"]
-
-    if 'reserve_size' not in pools['0']:
-        # For out of date validator
-        allocations = {k: v["borrow_amount"] for k, v in pools.items()}
-        return allocations
-
-
-    # Define the bounds for the variables
-    bnds = [(0, 1) for _ in pools.items()]  # Assuming x[0] and x[1] are bounded between 0 and 1
-
-    # Define the equality constraint (sum of elements equals 1)
-    cons = {'type': 'eq', 'fun': lambda x: np.sum(x) - max_balance}
-
-    x0 = np.array([0 for _ in pools.items()])
-
-    # Perform the optimization using the SLSQP method which supports constraints
-    res = minimize(simulated_yiop_target_function, x0, args=(synapse.assets_and_pools), method='SLSQP', constraints=cons, bounds=bnds)
 
     # round down because sometimes the optimizer gives result which is slightly above max_balance
     allocation = round_down_to_sum_below(res.x, max_balance)
