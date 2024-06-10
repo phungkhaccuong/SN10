@@ -22,10 +22,10 @@ def target_function(x, pools):
 
 
 def round_down_to_4_digits(arr: List[float]) -> np.array:
-    return np.array([Decimal(str(x)).quantize(Decimal('0.0000'), rounding='ROUND_DOWN') for x in arr])
+    return np.array([Decimal(str(x)).quantize(Decimal('0.000000000000'), rounding='ROUND_DOWN') for x in arr])
 
 
-def round_down_to_sum_below(arr: List[float], max_value, epsilon=Decimal('0.000001')):
+def round_down_to_sum_below(arr: List[float], max_value, epsilon=Decimal('0.00000000000001')):
     # using Decimal to prevent cheater punishment
     max_value = Decimal(max_value)
     # Convert the input array to a list of Decimals
@@ -229,7 +229,6 @@ def yiop_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dict:
 
     # Perform the optimization using the SLSQP method which supports constraints
     res = minimize(target_function, x0, args=(pools), method='SLSQP', constraints=cons, bounds=bnds)
-
     # round down because sometimes the optimizer gives result which is slightly above max_balance
     allocation = round_down_to_sum_below(res.x, max_balance)
 
