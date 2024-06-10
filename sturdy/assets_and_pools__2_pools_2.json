@@ -1,0 +1,1 @@
+{"total_assets": 2.0, "pools": {"0": {"pool_id": "0", "base_rate": 0.03, "base_slope": 0.03, "kink_slope": 0.473, "optimal_util_rate": 0.8, "borrow_amount": 0.8, "reserve_size": 1.0}, "1": {"pool_id": "1", "base_rate": 0.05, "base_slope": 0.059, "kink_slope": 0.723, "optimal_util_rate": 0.75, "borrow_amount": 0.85, "reserve_size": 1.0}}}
