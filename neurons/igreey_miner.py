@@ -81,5 +81,5 @@ class SimMiner(Miner):
 if __name__ == "__main__":
     with SimMiner() as miner:
         while True:
-            bt.logging.info("SimMiner running... v1.0.2", time.time())
+            bt.logging.info("iGreedyMiner running... v1.0.2", time.time())
             time.sleep(5)
