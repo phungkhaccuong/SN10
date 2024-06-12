@@ -93,6 +93,37 @@ def reward(
     )
 
 
+def calc_list_agg_py(
+    allocations: Dict[str, float],
+    assets_and_pools: Dict[str, Union[Dict[str, float], float]],
+    timesteps: int,
+    pool_history: Dict[str, Dict[str, Any]],
+):
+    """
+    Calculates aggregate yields given intial assets and pools, pool history, and number of timesteps
+    """
+    res = []
+    # calculate aggregate yield
+    initial_balance = assets_and_pools["total_assets"]
+    pct_yield = 0
+    for pools in pool_history:
+        curr_yield = 0
+        for uid, allocs in allocations.items():
+            pool_data = pools[uid]
+            util_rate = pool_data["borrow_amount"] / pool_data["reserve_size"]
+            pool_yield = allocs * supply_rate(util_rate, assets_and_pools["pools"][uid])
+            curr_yield += pool_yield
+        pct_yield += curr_yield
+        res.append(curr_yield)
+
+    pct_yield /= initial_balance
+    aggregate_apy = (
+        pct_yield / timesteps
+    ) * 365  # for simplicity each timestep is a day in the simulator
+
+    return aggregate_apy, res
+
+
 def calculate_aggregate_apy(
     allocations: Dict[str, float],
     assets_and_pools: Dict[str, Union[Dict[str, float], float]],
