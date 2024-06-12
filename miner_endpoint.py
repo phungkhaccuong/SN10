@@ -7,6 +7,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from sturdy.protocol import AllocateAssets
+from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
 from sturdy.utils.yiop import yiop_allocation_algorithm
 
 
@@ -18,7 +19,7 @@ class MinerEndpoint:
 
     async def generate(self, synapse: AllocateAssets):
         try:
-            synapse.allocations = yiop_allocation_algorithm(synapse)
+            synapse.allocations = simulated_yiop_allocation_algorithm(synapse)
             return synapse
         except Exception as e:
             bt.logging.error("An error occurred while generating proven output",
