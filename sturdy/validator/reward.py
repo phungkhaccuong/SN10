@@ -331,8 +331,12 @@ def get_rewards(
         if cheating:
             miner_uid = uids[response_idx]
             bt.logging.warning(
-                f"CHEATER DETECTED  - MINER WITH UID {miner_uid} - PUNISHING 👊😠"
+                f"FF CHEATER DETECTED  - MINER WITH UID {miner_uid} - PUNISHING 👊😠"
             )
+            bt.logging.warning(
+                f"Allocations: {allocations} {np.sum(allocations.value())}"
+            )
+
             apys[miner_uid] = sys.float_info.min
             continue
 
