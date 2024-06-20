@@ -46,8 +46,11 @@ class MinerEndpoint:
 
     def save_redis(self, allocations_list, raw_key):
         for index, allocations in enumerate(allocations_list, start=1):
+            start_time10 = datetime.now()
             key = f"{raw_key}-{index}"
-            r.set(key, json.dumps(allocations), 30)
+            r.set(key, json.dumps(allocations))
+            end_time10 = datetime.now()
+            print(f"processed SearchSynapse11 in {(end_time10 - start_time10).total_seconds()} seconds")
 
 
 
