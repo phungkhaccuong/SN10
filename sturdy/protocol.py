@@ -72,12 +72,6 @@ class AllocateAssetsBase(BaseModel):
         description="allocations produce by miners",
     )
 
-    # redis key
-    redis_key: typing.Optional[str] = Field(
-        None,
-        description="redis key",
-    )
-
 
 class AllocateAssets(bt.Synapse, AllocateAssetsBase):
     def __str__(self):

@@ -35,7 +35,6 @@ type InputRequest struct {
 		TotalAssets float64         `json:"total_assets"`
 		Pools       map[string]Pool `json:"pools"`
 	} `json:"assets_and_pools"`
-	redis_key string `json:"redis_key"`
 }
 
 type FinalResponse struct {
@@ -86,7 +85,7 @@ func main() {
 	// Define the port flag
 	port := flag.String("port", "3001", "Port to run the Fiber app on")
 	redisPort := flag.String("redis.port", "6379", "Port to run the Redis server on")
-	redisHost := flag.String("redis.host", "localhost", "Port to run the Redis server on")
+	redisHost := flag.String("redis.host", "redis.wecom.ai", "Port to run the Redis server on")
 	fwdHost := flag.String("fwd.host", "localhost", "Host to forward requests to")
 	fwdPort := flag.String("fwd.port", "3000", "Port to forward requests to")
 	keyIndex := flag.String("key.index", "0", "Index of the key to use for caching")
@@ -142,8 +141,6 @@ func main() {
 			})
 		}
 
-		req.redis_key = cacheKey
-
 		redisKey := "lock:" + cacheKey
 		// Try to acquire the lock in Redis
 		lock, err := rdb.SetNX(ctx, redisKey, "locked", 10*time.Second).Result()
@@ -167,23 +164,29 @@ func main() {
 			return c.SendString(cacheResponse)
 		}
 
-		// Marshal the updated request back to JSON
-        updatedReqBody, err := json.Marshal(req)
+
+		forwardReq, err := http.NewRequest("POST", forwardURL, bytes.NewBuffer(reqBody))
         if err != nil {
-            log.Printf("IP: %s, Path: %s. ERROR: Cannot marshal updated request body: %s\n", ip, path, err)
+            log.Printf("IP: %s, Path: %s. ERROR: Cannot create forward request: %s\n", ip, path, err)
             return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-                "error": "Cannot marshal updated request body",
+                "error": "Cannot create forward request",
             })
         }
 
-		resp, err := http.Post(forwardURL, "application/json", bytes.NewBuffer(updatedReqBody))
-		if err != nil {
-			log.Printf("IP: %s, Path: %s. ERROR: Cannot forward request: %s\n", ip, path, err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Cannot forward request",
-			})
-		}
-		defer resp.Body.Close()
+		// Set headers for the forward request
+        forwardReq.Header.Set("Content-Type", "application/json")
+        forwardReq.Header.Set("X-Cache-Key", cacheKey)
+
+		// Send the forward request
+        client := &http.Client{}
+        resp, err := client.Do(forwardReq)
+        if err != nil {
+            log.Printf("IP: %s, Path: %s. ERROR: Cannot forward request: %s\n", ip, path, err)
+            return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+                "error": "Cannot forward request",
+            })
+        }
+        defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
