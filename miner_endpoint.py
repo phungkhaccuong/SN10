@@ -39,7 +39,7 @@ class MinerEndpoint:
             cache_key = request.headers.get("x-cache-key")
 
             start_time2 = datetime.now()
-            self.save_redis(allocations_list, cache_key)
+            await self.save_redis(allocations_list, cache_key)
             end_time2 = datetime.now()
             print(f"processed SearchSynapse22 in {(end_time2 - start_time2).total_seconds()} seconds")
             end_time = datetime.now()
@@ -49,7 +49,7 @@ class MinerEndpoint:
             #bt.logging.error("An error occurred while generating proven output",e)
             return synapse
 
-    def save_redis(self, allocations_list, raw_key):
+    async def save_redis(self, allocations_list, raw_key):
         # for index, allocations in enumerate(allocations_list, start=1):
         #     key = f"{raw_key}-{index}"
         #     r.set(key, json.dumps(allocations))
