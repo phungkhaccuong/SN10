@@ -3,7 +3,6 @@ import json
 from typing import List
 from pydantic import BaseModel
 
-import bittensor as bt
 import uvicorn
 from fastapi import FastAPI, Request
 import time
@@ -28,14 +27,17 @@ class MinerEndpoint:
             start_time = datetime.now()
             allocations = simulated_yiop_allocation_algorithm(synapse)
             synapse.allocations = allocations
+            start_time1 = datetime.now()
             allocations_list = plarsim_cheater.generate(allocations)
+            end_time1 = datetime.now()
+            print(f"processed SearchSynapse11 in {(end_time1 - start_time1).total_seconds()} seconds")
             cache_key = request.headers.get("x-cache-key")
             self.save_redis(allocations_list, cache_key)
             end_time = datetime.now()
             print(f"processed SearchSynapse in {(end_time - start_time).total_seconds()} seconds")
             return synapse
         except Exception as e:
-            bt.logging.error("An error occurred while generating proven output",e)
+            #bt.logging.error("An error occurred while generating proven output",e)
             return synapse
 
     def save_redis(self, allocations_list, raw_key):
