@@ -6,25 +6,36 @@ import bittensor as bt
 import uvicorn
 from fastapi import FastAPI
 
+from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.protocol import AllocateAssets
 from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
 from sturdy.utils.yiop import yiop_allocation_algorithm
+import redis
+r = redis.Redis(host='redis.wecom.ai', port=6379, db=0)
 
 
 class MinerEndpoint:
     def __init__(self):
         self.app = FastAPI()
-        self.app.add_api_route("/AllocateAssets", self.generate,
-                               methods=["POST"])
+        self.app.add_api_route("/AllocateAssets", self.generate, methods=["POST"])
 
     async def generate(self, synapse: AllocateAssets):
         try:
-            synapse.allocations = simulated_yiop_allocation_algorithm(synapse)
+            allocations = simulated_yiop_allocation_algorithm(synapse)
+            synapse.allocations = allocations
+            bt.logging.info(f"synapse::{synapse.__str__()}")
+            allocations_list = PlarsimCheater.generate(allocations)
+            self.save_redis(allocations_list, synapse.redis_key)
             return synapse
         except Exception as e:
-            bt.logging.error("An error occurred while generating proven output",
-                             e)
+            bt.logging.error("An error occurred while generating proven output",e)
             return synapse
+
+    def save_redis(self, allocations_list, raw_key):
+        for index, allocations in enumerate(allocations_list, start=1):
+            key = f"{raw_key}-{index}"
+            r.set(key, allocations)
+
 
 
 if __name__ == "__main__":
