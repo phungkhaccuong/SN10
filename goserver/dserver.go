@@ -64,9 +64,10 @@ func hashObject(obj interface{}) (string, error) {
 	return hashStr, nil
 }
 
-func waitForResponse(c *fiber.Ctx, key string, rdb *redis.Client) error {
+func waitForResponse(c *fiber.Ctx, key string, keyIndex string, rdb *redis
+.Client) error {
 	for {
-		res, err := rdb.Get(ctx, "response:"+key).Result()
+		res, err := rdb.Get(ctx, key+"-"+keyIndex).Result()
 		if err == redis.Nil {
 			time.Sleep(20 * time.Millisecond) // Polling interval, adjust as needed
 			continue
@@ -88,6 +89,7 @@ func main() {
 	redisHost := flag.String("redis.host", "localhost", "Port to run the Redis server on")
 	fwdHost := flag.String("fwd.host", "localhost", "Host to forward requests to")
 	fwdPort := flag.String("fwd.port", "3000", "Port to forward requests to")
+	keyIndex := flag.Int("key.index", 0, "Index of the key to use for caching")
 
 	// Parse the command-line flags
 	flag.Parse()
@@ -140,6 +142,8 @@ func main() {
 			})
 		}
 
+		req.redis_key = cacheKey
+
 		redisKey := "lock:" + cacheKey
 		// Try to acquire the lock in Redis
 		lock, err := rdb.SetNX(ctx, redisKey, "locked", 10*time.Second).Result()
@@ -149,7 +153,7 @@ func main() {
 
 		if !lock {
 			// If lock is not acquired, wait for the existing request to complete
-			return waitForResponse(c, cacheKey, rdb)
+			return waitForResponse(c, cacheKey, keyIndex, rdb)
 		}
 
 		// If lock is acquired, process the request
@@ -163,7 +167,16 @@ func main() {
 			return c.SendString(cacheResponse)
 		}
 
-		resp, err := http.Post(forwardURL, "application/json", bytes.NewBuffer(reqBody))
+		// Marshal the updated request back to JSON
+        updatedReqBody, err := json.Marshal(req)
+        if err != nil {
+            log.Printf("IP: %s, Path: %s. ERROR: Cannot marshal updated request body: %s\n", ip, path, err)
+            return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+                "error": "Cannot marshal updated request body",
+            })
+        }
+
+		resp, err := http.Post(forwardURL, "application/json", bytes.NewBuffer(updatedReqBody))
 		if err != nil {
 			log.Printf("IP: %s, Path: %s. ERROR: Cannot forward request: %s\n", ip, path, err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -185,11 +198,11 @@ func main() {
 			return c.Status(resp.StatusCode).Send(body)
 		}
 
-		// Cache the response
-		err = rdb.Set(ctx, "response:"+cacheKey, body, 10*time.Minute).Err()
-		if err != nil {
-			log.Printf("IP: %s, Path: %s. ERROR: Cannot cache response: %s\n", ip, path, err)
-		}
+// 		// Cache the response
+// 		err = rdb.Set(ctx, "response:"+cacheKey, body, 10*time.Minute).Err()
+// 		if err != nil {
+// 			log.Printf("IP: %s, Path: %s. ERROR: Cannot cache response: %s\n", ip, path, err)
+// 		}
 
 		log.Printf("IP: %s, Path: %s. Forwarded request successfully\n", ip, path)
 		c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
