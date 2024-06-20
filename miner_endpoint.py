@@ -44,7 +44,7 @@ class MinerEndpoint:
     def save_redis(self, allocations_list, raw_key):
         for index, allocations in enumerate(allocations_list, start=1):
             key = f"{raw_key}-{index}"
-            r.set(key, json.dumps(allocations))
+            r.set(key, json.dumps(allocations), 30)
 
 
 

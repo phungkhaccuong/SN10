@@ -157,13 +157,13 @@ func main() {
 		defer rdb.Del(ctx, redisKey) // Release the lock when done
 
 		// Check if response is in cache
-		cacheResponse, err := rdb.Get(ctx, "response:"+cacheKey).Result()
+		log.Printf("key: %s \n", cacheKey + "-" + *keyIndex)
+		cacheResponse, err := rdb.Get(ctx, cacheKey + "-" + *keyIndex).Result()
 		if err == nil {
 			log.Printf("IP: %s, Path: %s. Cache hit\n", ip, path)
 			c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 			return c.SendString(cacheResponse)
 		}
-
 
 		forwardReq, err := http.NewRequest("POST", forwardURL, bytes.NewBuffer(reqBody))
         if err != nil {
