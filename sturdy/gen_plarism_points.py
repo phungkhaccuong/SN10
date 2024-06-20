@@ -57,9 +57,9 @@ def generate_points_with_min_distance(N, dim=3, min_distance=0.1, radius_step=1e
 
 def main():
     # Parameters
-    N = 256  # Number of points to generate
+    N = 80  # Number of points to generate
     dim = 10 # Dimension of each point
-    min_distance = 0.1  # Minimum distance between points
+    min_distance = 0.2  # Minimum distance between points
 
     # Generate points with minimum distance constraint
     points = generate_points_with_min_distance(N, dim=dim, min_distance=min_distance, epsilon=1e-10, radius_step=1e-2)
