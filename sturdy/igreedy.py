@@ -109,7 +109,7 @@ def igreedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dic
         return arr
 
     yiop_alloc = yiop_allocation_algorithm(synapse)
-    print('init allocations', yiop_alloc)
+    # print('init allocations', yiop_alloc)
     arr = []
     for pool in pools.values():
         res = minimize(pool_target, 0, args=(pool['borrow_amount'] + 0.1, pool), bounds=[(0, max_balance/2)], method='SLSQP')
@@ -120,14 +120,14 @@ def igreedy_allocation_algorithm(synapse: sturdy.protocol.AllocateAssets) -> Dic
 
     best_allocations = {k: v for k, v in zip(pools.keys(), x0)}
 
-    print('best allocations', best_allocations)
+    # print('best allocations', best_allocations)
 
     diff = []
     for k in best_allocations.keys():
         diff.append(best_allocations[k] - yiop_alloc[k])
-    print('diff',{k: v for k, v in zip(pools.keys(), diff)})
+    # print('diff',{k: v for k, v in zip(pools.keys(), diff)})
     adjust = normalize_sum_zero(diff)
-    print('adjust',{k: v for k, v in zip(pools.keys(), adjust)})
+    # print('adjust',{k: v for k, v in zip(pools.keys(), adjust)})
     better = {}
     for k, v in yiop_alloc.items():
         better[k] = v + adjust[int(k)]
@@ -210,7 +210,7 @@ def igreedy_orthogonal_allocation_allocations(synapse: sturdy.protocol.AllocateA
     # print('init allocations', yiop_alloc)
     arr = []
     for pool in pools.values():
-        res = minimize(pool_target, 0, args=(pool['borrow_amount'] + 0.1, pool), bounds=[(0, max_balance/2)], method='SLSQP')
+        res = minimize(pool_target, 0, args=(pool['borrow_amount'] + 0.3, pool), bounds=[(0, max_balance)], method='SLSQP')
         # res = minimize(pool_target, 0, args=(pool["reserve_size"], pool), bounds=[(0, 0.6)], method='SLSQP')
         arr.append(res.x[0])
     x0 = np.array(arr)
@@ -218,7 +218,7 @@ def igreedy_orthogonal_allocation_allocations(synapse: sturdy.protocol.AllocateA
 
     best_allocations = {k: v for k, v in zip(pools.keys(), x0)}
 
-    # print('best allocations', best_allocations)
+    print('best allocations', best_allocations)
 
     init_vector = np.array(list(yiop_alloc.values()))
     target_vector = np.array(list(best_allocations.values()))
@@ -239,3 +239,10 @@ def igreedy_sphere_allocation_allocations(synapse: sturdy.protocol.AllocateAsset
     for i in range(10):
         better[str(i)] += vector[i]
     return better
+
+
+def disturb(synapse):
+    allocation = yiop_allocation_algorithm(synapse)
+    x =  [0.00510775, 0.01590273, -0.01409674, 0.02079831, 0.00308688, 0.01238793, -0.02899458, -0.06526999, -0.00996757, 0.06104528]
+    allocation = {f'{i}': x[i] + allocation[str(i)] for i in range(10)}
+    return allocation

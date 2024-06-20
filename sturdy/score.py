@@ -132,6 +132,7 @@ def calc_strategy_apy(allocations, assets_and_pools, simulator=None, seed=None):
 
     return calculate_apy(simulator, assets_and_pools, allocations)
 
+
 def strategies_apy(strategies):
     init_assets_and_pools = generate_assets_and_pools()
 
