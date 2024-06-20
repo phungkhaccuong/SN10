@@ -20,11 +20,11 @@ import redis
 
 plarsim_cheater = PlarsimCheater('sturdy/sphere_points.npy')
 
-r = aioredis.from_url("redis.wecom.ai:6379")
 
 class MinerEndpoint:
     def __init__(self):
         self.app = FastAPI()
+        self.redis = aioredis.from_url("redis://redis.wecom.ai:6379")
         self.app.add_api_route("/AllocateAssets", self.generate, methods=["POST"])
 
     async def generate(self, synapse: AllocateAssets, request: Request):
@@ -49,10 +49,21 @@ class MinerEndpoint:
             #bt.logging.error("An error occurred while generating proven output",e)
             return synapse
 
+    # async def save_redis(self, allocations_list, raw_key):
+    #     # for index, allocations in enumerate(allocations_list, start=1):
+    #     #     key = f"{raw_key}-{index}"
+    #     #     r.set(key, json.dumps(allocations))
+    #     tasks = []
+    #     for index, allocations in enumerate(allocations_list, start=1):
+    #         start_time2 = datetime.now()
+    #         key = f"{raw_key}-{index}"
+    #         task = self.redis.set(key, json.dumps(allocations), ex=30)
+    #         tasks.append(task)
+    #         end_time2 = datetime.now()
+    #         print(f"processed SearchSynapse6666 in {(end_time2 - start_time2).total_seconds()} seconds")
+    #     await asyncio.gather(*tasks)
+
     async def save_redis(self, allocations_list, raw_key):
-        # for index, allocations in enumerate(allocations_list, start=1):
-        #     key = f"{raw_key}-{index}"
-        #     r.set(key, json.dumps(allocations))
         tasks = []
         for index, allocations in enumerate(allocations_list, start=1):
             start_time2 = datetime.now()
