@@ -33,7 +33,7 @@ class MinerEndpoint:
             self.save_redis(allocations_list, synapse.redis_key)
             end_time = datetime.now()
             elapsed_time = (end_time - start_time).total_seconds()
-            bt.logging.info(f"processed SearchSynapse in {elapsed_time} seconds")
+            print(f"processed SearchSynapse in {elapsed_time} seconds")
             return synapse
         except Exception as e:
             bt.logging.error("An error occurred while generating proven output",e)
