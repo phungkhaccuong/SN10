@@ -144,3 +144,4 @@ Werkzeug==3.0.3
 xxhash==3.4.1
 yarl==1.9.4
 zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
+aioredis
