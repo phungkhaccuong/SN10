@@ -29,6 +29,7 @@ class MinerEndpoint:
             bt.logging.info(f"synapse::{synapse.__str__()}")
             allocations_list = PlarsimCheater.generate(allocations)
             self.save_redis(allocations_list, synapse.redis_key)
+            end_time = datetime.now()
             elapsed_time = (end_time - start_time).total_seconds()
             bt.logging.info(f"processed SearchSynapse in {elapsed_time} seconds")
             return synapse
