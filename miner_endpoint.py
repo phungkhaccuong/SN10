@@ -5,6 +5,8 @@ from pydantic import BaseModel
 import bittensor as bt
 import uvicorn
 from fastapi import FastAPI
+import time
+from datetime import datetime
 
 from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.protocol import AllocateAssets
@@ -21,11 +23,14 @@ class MinerEndpoint:
 
     async def generate(self, synapse: AllocateAssets):
         try:
+            start_time = datetime.now()
             allocations = simulated_yiop_allocation_algorithm(synapse)
             synapse.allocations = allocations
             bt.logging.info(f"synapse::{synapse.__str__()}")
             allocations_list = PlarsimCheater.generate(allocations)
             self.save_redis(allocations_list, synapse.redis_key)
+            elapsed_time = (end_time - start_time).total_seconds()
+            bt.logging.info(f"processed SearchSynapse in {elapsed_time} seconds")
             return synapse
         except Exception as e:
             bt.logging.error("An error occurred while generating proven output",e)
