@@ -12,10 +12,15 @@ from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.protocol import AllocateAssets
 from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
 from sturdy.utils.yiop import yiop_allocation_algorithm
+import aioredis
+import asyncio
+
 import redis
-r = redis.Redis(host='redis.wecom.ai', port=6379, db=0)
+# r = redis.Redis(host='redis.wecom.ai', port=6379, db=0)
 
 plarsim_cheater = PlarsimCheater('sturdy/sphere_points.npy')
+
+r = aioredis.from_url("redis.wecom.ai:6379")
 
 class MinerEndpoint:
     def __init__(self):
@@ -45,12 +50,19 @@ class MinerEndpoint:
             return synapse
 
     def save_redis(self, allocations_list, raw_key):
+        # for index, allocations in enumerate(allocations_list, start=1):
+        #     key = f"{raw_key}-{index}"
+        #     r.set(key, json.dumps(allocations))
+        tasks = []
         for index, allocations in enumerate(allocations_list, start=1):
-            start_time10 = datetime.now()
+            start_time2 = datetime.now()
             key = f"{raw_key}-{index}"
-            r.set(key, json.dumps(allocations))
-            end_time10 = datetime.now()
-            print(f"processed SearchSynapse11 in {(end_time10 - start_time10).total_seconds()} seconds")
+            task = self.redis.set(key, json.dumps(allocations), ex=30)
+            tasks.append(task)
+            end_time2 = datetime.now()
+            print(f"processed SearchSynapse6666 in {(end_time2 - start_time2).total_seconds()} seconds")
+        await asyncio.gather(*tasks)
+
 
 
 
