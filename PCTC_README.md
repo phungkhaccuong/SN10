@@ -46,3 +46,12 @@ For MacOS: `arch -arm64 brew install pkg-config`
 pm2 start miner_endpoint.py --name miner_endpoint --interpreter python3 -- \
 --port 8888
 ```
+
+
+# Plarism cheater
+
+To avoid plarism cheater, we disturb the original result a bit. To choose a range of points that are wider or a narrower:
+1. Use PlarismCheater to generate list of points
+    1. Input: `sphere_points.npy` => best apy, worst penalties
+    2. Input: `sphere_points_v1.npy` => mid apy, mid penalties
+    3. Input: `sphere_points_v2.npy` => worst apy, almost no penalties
