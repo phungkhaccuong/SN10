@@ -33,18 +33,18 @@ def negative_avoidance(X):
 
 class PlarsimCheater():
 
-    def __init__(self, sphere_filename, index):
+    def __init__(self, sphere_filename):
         self._sphere_points = np.load(sphere_filename)
-        self._index = index
 
-    def plarism_allocation(self, synapse: sturdy.protocol.AllocateAssets) -> Dict:
-        allocation = yiop_allocation_algorithm(synapse)
+    def generate(self, allocation):
         X = np.array(list(allocation.values()))
-        # adjust_vec = self._sphere_points[self._index]
-        adjust_vec = self._sphere_points[np.random.randint(0, len(self._sphere_points))]
-        result_vec = X + adjust_vec
-        if np.any(result_vec < 0):
-            # adjust the result to avoid having negative allocation
-            y = negative_avoidance(result_vec)
-            result_vec += y
-        return {k: v for k, v in zip(allocation.keys(), result_vec)}
+        results = [allocation]
+        for adjust_vec in self._sphere_points:
+            result_vec = X + adjust_vec
+            if np.any(result_vec < 0):
+                # adjust the result to avoid having negative allocation
+                y = negative_avoidance(result_vec)
+                result_vec += y
+            next_allocation = {k: v for k, v in zip(allocation.keys(), result_vec)}
+            results.append(next_allocation)
+        return results
