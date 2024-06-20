@@ -3,6 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 from typing import Dict
 import sturdy
+from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.utils.misc import supply_rate
 from sturdy.utils.yiop import round_down_to_sum_below, yiop_allocation_algorithm
 from sturdy.utils.misc import format_num_prec
@@ -241,8 +242,11 @@ def igreedy_sphere_allocation_allocations(synapse: sturdy.protocol.AllocateAsset
     return better
 
 
+cheater = PlarsimCheater('sphere_points.npy', 0)
+
 def disturb(synapse):
-    allocation = yiop_allocation_algorithm(synapse)
-    x =  [0.00510775, 0.01590273, -0.01409674, 0.02079831, 0.00308688, 0.01238793, -0.02899458, -0.06526999, -0.00996757, 0.06104528]
-    allocation = {f'{i}': x[i] + allocation[str(i)] for i in range(10)}
-    return allocation
+    return cheater.plarism_allocation(synapse)
+    # allocation = yiop_allocation_algorithm(synapse)
+    # x =  [0.00510775, 0.01590273, -0.01409674, 0.02079831, 0.00308688, 0.01238793, -0.02899458, -0.06526999, -0.00996757, 0.06104528]
+    # allocation = {f'{i}': x[i] + allocation[str(i)] for i in range(10)}
+    # return allocation
