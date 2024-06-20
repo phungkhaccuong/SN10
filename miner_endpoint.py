@@ -15,6 +15,7 @@ from sturdy.utils.yiop import yiop_allocation_algorithm
 import redis
 r = redis.Redis(host='redis.wecom.ai', port=6379, db=0)
 
+cheater = PlarsimCheater('sturdy/sphere_points.npy')
 
 class MinerEndpoint:
     def __init__(self):
@@ -26,8 +27,8 @@ class MinerEndpoint:
             start_time = datetime.now()
             allocations = simulated_yiop_allocation_algorithm(synapse)
             synapse.allocations = allocations
-            bt.logging.info(f"synapse::{synapse.__str__()}")
-            allocations_list = PlarsimCheater.generate(allocations)
+            print(f"synapse::{synapse.__str__()}")
+            allocations_list = cheater.generate(allocations)
             self.save_redis(allocations_list, synapse.redis_key)
             end_time = datetime.now()
             elapsed_time = (end_time - start_time).total_seconds()

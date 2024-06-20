@@ -73,7 +73,10 @@ class AllocateAssetsBase(BaseModel):
     )
 
     # redis key
-    redis_key: str
+    redis_key: typing.Optional[str] = Field(
+        None,
+        description="redis key",
+    )
 
 
 class AllocateAssets(bt.Synapse, AllocateAssetsBase):
