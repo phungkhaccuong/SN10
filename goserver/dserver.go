@@ -35,6 +35,7 @@ type InputRequest struct {
 		TotalAssets float64         `json:"total_assets"`
 		Pools       map[string]Pool `json:"pools"`
 	} `json:"assets_and_pools"`
+	redis_key string `json:"redis_key"`
 }
 
 type FinalResponse struct {
@@ -64,8 +65,7 @@ func hashObject(obj interface{}) (string, error) {
 	return hashStr, nil
 }
 
-func waitForResponse(c *fiber.Ctx, key string, keyIndex string, rdb *redis
-.Client) error {
+func waitForResponse(c *fiber.Ctx, key string, keyIndex string, rdb *redis.Client) error {
 	for {
 		res, err := rdb.Get(ctx, key+"-"+keyIndex).Result()
 		if err == redis.Nil {
@@ -89,7 +89,7 @@ func main() {
 	redisHost := flag.String("redis.host", "localhost", "Port to run the Redis server on")
 	fwdHost := flag.String("fwd.host", "localhost", "Host to forward requests to")
 	fwdPort := flag.String("fwd.port", "3000", "Port to forward requests to")
-	keyIndex := flag.Int("key.index", 0, "Index of the key to use for caching")
+	keyIndex := flag.String("key.index", "0", "Index of the key to use for caching")
 
 	// Parse the command-line flags
 	flag.Parse()
@@ -153,7 +153,7 @@ func main() {
 
 		if !lock {
 			// If lock is not acquired, wait for the existing request to complete
-			return waitForResponse(c, cacheKey, keyIndex, rdb)
+			return waitForResponse(c, cacheKey, *keyIndex, rdb)
 		}
 
 		// If lock is acquired, process the request
