@@ -16,7 +16,7 @@ from sturdy.utils.yiop import yiop_allocation_algorithm
 import redis
 r = redis.Redis(host='redis.wecom.ai', port=6379, db=0)
 
-cheater = PlarsimCheater('sturdy/sphere_points.npy')
+plarsim_cheater = PlarsimCheater('sturdy/sphere_points.npy')
 
 class MinerEndpoint:
     def __init__(self):
@@ -27,15 +27,12 @@ class MinerEndpoint:
         try:
             start_time = datetime.now()
             allocations = simulated_yiop_allocation_algorithm(synapse)
-
-            cache_key = request.headers.get("x-cache-key")
             synapse.allocations = allocations
-            print(f"synapse::{synapse.__str__()}")
-            allocations_list = cheater.generate(allocations)
+            allocations_list = plarsim_cheater.generate(allocations)
+            cache_key = request.headers.get("x-cache-key")
             self.save_redis(allocations_list, cache_key)
             end_time = datetime.now()
-            elapsed_time = (end_time - start_time).total_seconds()
-            print(f"processed SearchSynapse in {elapsed_time} seconds")
+            print(f"processed SearchSynapse in {(end_time - start_time).total_seconds()} seconds")
             return synapse
         except Exception as e:
             bt.logging.error("An error occurred while generating proven output",e)
