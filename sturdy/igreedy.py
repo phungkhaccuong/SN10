@@ -242,7 +242,7 @@ def igreedy_sphere_allocation_allocations(synapse: sturdy.protocol.AllocateAsset
     return better
 
 
-cheater = PlarsimCheater('sphere_points.npy', 0)
+cheater = PlarsimCheater('sphere_points.npy')
 
 def disturb(synapse):
     allocation = yiop_allocation_algorithm(synapse)
