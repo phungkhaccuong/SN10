@@ -13,7 +13,7 @@ from sturdy.protocol import AllocateAssets
 from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
 from sturdy.utils.yiop import yiop_allocation_algorithm
 
-plarsim_cheater = PlarsimCheater('sturdy/sphere_points.npy')
+plarsim_cheater = PlarsimCheater('sturdy/sphere_points_v2.npy')
 
 
 class MinerEndpoint:
