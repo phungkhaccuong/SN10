@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request
 from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.protocol import AllocateAssets
 from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
+from sturdy.utils.yiop import yiop_allocation_algorithm
 
 plarsim_cheater = PlarsimCheater('sturdy/sphere_points.npy')
 
@@ -24,7 +25,7 @@ class MinerEndpoint:
     async def generate(self, synapse: AllocateAssets, request: Request):
         try:
             start_time = datetime.now()
-            allocations = simulated_yiop_allocation_algorithm(synapse)
+            allocations = yiop_allocation_algorithm(synapse)
             synapse.allocations = allocations
             allocations_list = plarsim_cheater.generate(allocations)
             cache_key = request.headers.get("x-cache-key")
