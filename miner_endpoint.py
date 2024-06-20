@@ -32,7 +32,11 @@ class MinerEndpoint:
             end_time1 = datetime.now()
             print(f"processed SearchSynapse11 in {(end_time1 - start_time1).total_seconds()} seconds")
             cache_key = request.headers.get("x-cache-key")
+
+            start_time2 = datetime.now()
             self.save_redis(allocations_list, cache_key)
+            end_time2 = datetime.now()
+            print(f"processed SearchSynapse22 in {(end_time2 - start_time2).total_seconds()} seconds")
             end_time = datetime.now()
             print(f"processed SearchSynapse in {(end_time - start_time).total_seconds()} seconds")
             return synapse
