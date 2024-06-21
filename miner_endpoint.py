@@ -46,8 +46,14 @@ class MinerEndpoint:
             for index, allocations in enumerate(allocations_list, start=1):
                 key = f"{raw_key}-{index}"
                 synapse.allocations = allocations
-                print(f"DUMP:{json.dumps(self.to_dict(synapse))}")
-                task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
+                dict = synapse.dict()
+                del dict['axon']
+                del dict['dendrite']
+
+                task = self.redis.set(key, json.dumps(dict), ex=30)
+
+                # print(f"DUMP:{json.dumps(self.to_dict(synapse))}")
+                # task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
                 tasks.append(task)
             await asyncio.gather(*tasks)
         except Exception as e:
