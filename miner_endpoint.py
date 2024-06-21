@@ -6,6 +6,7 @@ from datetime import datetime
 import aioredis
 import bittensor as bt
 import uvicorn
+from bittensor import TerminalInfo
 from fastapi import FastAPI, Request
 
 from sturdy.plarism_cheater import PlarsimCheater
@@ -36,7 +37,7 @@ class MinerEndpoint:
             print(f"processed SearchSynapse in {(end_time - start_time).total_seconds()} seconds")
             return synapse
         except Exception as e:
-            bt.logging.error("An error occurred while generating proven output",e)
+            bt.logging.error("An error occurred while generating proven output", e)
             return synapse
 
     async def save_redis(self, synapse, allocations_list, raw_key):
@@ -52,8 +53,9 @@ class MinerEndpoint:
         except Exception as e:
             pass
 
-
     def to_dict(self, synapse):
+        terminalInfo = TerminalInfo(status_code=None, status_message=None, process_time=None, ip=None, port=None,
+                                    version=None, nonce=None, uuid=None, hotkey=None, signature=None)
         return {
             "assets_and_pools": synapse.assets_and_pools,
             "allocations": synapse.allocations,
@@ -61,20 +63,25 @@ class MinerEndpoint:
             "timeout": synapse.timeout,
             "total_size": synapse.total_size,
             "header_size": synapse.header_size,
-            "dendrite": synapse.dendrite,
-            "axon": synapse.axon,
+            "dendrite": self.to_dict_terminal_info(terminalInfo),
+            "axon": self.to_dict_terminal_info(terminalInfo),
             "computed_body_hash": synapse.computed_body_hash,
             "required_hash_fields": synapse.required_hash_fields
         }
 
-    # def to_dict_terminal_info(self, synapse):
-    #     return {
-    #         "status_code": synapse.dendrite.sta
-    #
-    #     }
-    #
-    # TerminalInfo(status_code=None, status_message=None, process_time=None, ip=None, port=None, version=None, nonce=None,
-    #              uuid=None, hotkey=None, signature=None)
+    def to_dict_terminal_info(self, terminalInfo):
+        return {
+            "status_code": terminalInfo.status_code,
+            "status_message": terminalInfo.status_message,
+            "process_time": terminalInfo.process_time,
+            "ip": terminalInfo.ip,
+            "port": terminalInfo.port,
+            "version": terminalInfo.version,
+            "nonce": terminalInfo.nonce,
+            "uuid": terminalInfo.uuid,
+            "hotkey": terminalInfo.hotkey,
+            "signature": terminalInfo.signature
+        }
 
 
 if __name__ == "__main__":
