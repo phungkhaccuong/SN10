@@ -43,9 +43,23 @@ class MinerEndpoint:
         for index, allocations in enumerate(allocations_list, start=1):
             key = f"{raw_key}-{index}"
             synapse.allocations = allocations
-            task = self.redis.set(key, json.dumps(synapse), ex=30)
+            task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
             tasks.append(task)
         await asyncio.gather(*tasks)
+
+    def to_dict(self, synapse):
+        return {
+            "assets_and_pools": synapse.assets_and_pools,
+            "allocations": synapse.allocations,
+            "name": synapse.name,
+            "timeout": synapse.timeout,
+            "total_size": synapse.total_size,
+            "header_size": synapse.header_size,
+            "dendrite": synapse.dendrite,
+            "axon": synapse.axon,
+            "computed_body_hash": synapse.computed_body_hash,
+            "required_hash_fields": synapse.required_hash_fields
+        }
 
 
 if __name__ == "__main__":
