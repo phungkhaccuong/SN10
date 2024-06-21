@@ -41,6 +41,7 @@ class MinerEndpoint:
     async def save_redis(self, synapse, allocations_list, raw_key):
         try:
             tasks = []
+            print(f"data:{synapse.__dict__}")
             for index, allocations in enumerate(allocations_list, start=1):
                 key = f"{raw_key}-{index}"
                 synapse.allocations = allocations
