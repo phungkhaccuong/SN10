@@ -30,7 +30,7 @@ class MinerEndpoint:
             allocations_list = plarsim_cheater.generate(allocations)
             cache_key = request.headers.get("x-cache-key")
 
-            await self.save_redis(allocations_list, cache_key)
+            await self.save_redis(synapse, allocations_list, cache_key)
             end_time = datetime.now()
             print(f"processed SearchSynapse in {(end_time - start_time).total_seconds()} seconds")
             return synapse
@@ -38,11 +38,12 @@ class MinerEndpoint:
             bt.logging.error("An error occurred while generating proven output",e)
             return synapse
 
-    async def save_redis(self, allocations_list, raw_key):
+    async def save_redis(self, synapse, allocations_list, raw_key):
         tasks = []
         for index, allocations in enumerate(allocations_list, start=1):
             key = f"{raw_key}-{index}"
-            task = self.redis.set(key, json.dumps(allocations), ex=30)
+            synapse.allocations = allocations
+            task = self.redis.set(key, json.dumps(synapse), ex=30)
             tasks.append(task)
         await asyncio.gather(*tasks)
 
