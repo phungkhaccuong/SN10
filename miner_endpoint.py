@@ -39,13 +39,17 @@ class MinerEndpoint:
             return synapse
 
     async def save_redis(self, synapse, allocations_list, raw_key):
-        tasks = []
-        for index, allocations in enumerate(allocations_list, start=1):
-            key = f"{raw_key}-{index}"
-            synapse.allocations = allocations
-            task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
-            tasks.append(task)
-        await asyncio.gather(*tasks)
+        try:
+            tasks = []
+            for index, allocations in enumerate(allocations_list, start=1):
+                key = f"{raw_key}-{index}"
+                synapse.allocations = allocations
+                task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
+                tasks.append(task)
+            await asyncio.gather(*tasks)
+        except Exception as e:
+            pass
+
 
     def to_dict(self, synapse):
         return {
