@@ -24,6 +24,7 @@ class MinerEndpoint:
 
     async def generate(self, synapse: AllocateAssets, request: Request):
         try:
+            print(f"new data:{synapse.__dict__}")
             start_time = datetime.now()
             allocations = yiop_allocation_algorithm(synapse)
             synapse.allocations = allocations
@@ -65,6 +66,15 @@ class MinerEndpoint:
             "computed_body_hash": synapse.computed_body_hash,
             "required_hash_fields": synapse.required_hash_fields
         }
+
+    # def to_dict_terminal_info(self, synapse):
+    #     return {
+    #         "status_code": synapse.dendrite.sta
+    #
+    #     }
+    #
+    # TerminalInfo(status_code=None, status_message=None, process_time=None, ip=None, port=None, version=None, nonce=None,
+    #              uuid=None, hotkey=None, signature=None)
 
 
 if __name__ == "__main__":
