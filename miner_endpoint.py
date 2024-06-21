@@ -40,25 +40,21 @@ class MinerEndpoint:
             return synapse
 
     async def save_redis(self, synapse, allocations_list, raw_key):
-        try:
-            tasks = []
-            print(f"data:{synapse.__dict__}")
-            for index, allocations in enumerate(allocations_list, start=1):
-                key = f"{raw_key}-{index}"
-                synapse.allocations = allocations
-                dict = synapse.dict()
-                del dict['axon']
-                del dict['dendrite']
+        tasks = []
+        print(f"data:{synapse.__dict__}")
+        for index, allocations in enumerate(allocations_list, start=1):
+            key = f"{raw_key}-{index}"
+            synapse.allocations = allocations
+            dict = synapse.dict()
+            del dict['axon']
+            del dict['dendrite']
 
-                task = self.redis.set(key, json.dumps(dict), ex=30)
+            task = self.redis.set(key, json.dumps(dict), ex=30)
 
-                # print(f"DUMP:{json.dumps(self.to_dict(synapse))}")
-                # task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
-                tasks.append(task)
-            await asyncio.gather(*tasks)
-        except Exception as e:
-            print("save_redis error")
-            pass
+            # print(f"DUMP:{json.dumps(self.to_dict(synapse))}")
+            # task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
+            tasks.append(task)
+        await asyncio.gather(*tasks)
 
     def to_dict(self, synapse):
         terminalInfo = TerminalInfo(status_code=None, status_message=None, process_time=None, ip=None, port=None,
