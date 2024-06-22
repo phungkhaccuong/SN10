@@ -38,7 +38,7 @@ class PlarsimCheater():
 
     def generate(self, allocation):
         X = np.array(list(allocation.values()))
-        results = [allocation]
+        results = []
         for adjust_vec in self._sphere_points:
             result_vec = X + adjust_vec
             if np.any(result_vec < 0):
