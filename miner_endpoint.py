@@ -11,10 +11,9 @@ from fastapi import FastAPI, Request
 
 from sturdy.plarism_cheater import PlarsimCheater
 from sturdy.protocol import AllocateAssets
-from sturdy.utils.sim_yiop import simulated_yiop_allocation_algorithm
 from sturdy.utils.yiop import yiop_allocation_algorithm
 
-plarsim_cheater = PlarsimCheater('sturdy/sphere_points_v2.npy')
+plarsim_cheater = PlarsimCheater('sturdy/min_0.25__radius_step_1e_2.npy')
 
 
 class MinerEndpoint:
@@ -41,7 +40,6 @@ class MinerEndpoint:
 
     async def save_redis(self, synapse, allocations_list, raw_key):
         tasks = []
-        print(f"data:{synapse.__dict__}")
         for index, allocations in enumerate(allocations_list, start=1):
             key = f"{raw_key}-{index}"
             synapse.allocations = allocations
@@ -50,9 +48,6 @@ class MinerEndpoint:
             del dict['dendrite']
 
             task = self.redis.set(key, json.dumps(dict), ex=30)
-
-            # print(f"DUMP:{json.dumps(self.to_dict(synapse))}")
-            # task = self.redis.set(key, json.dumps(self.to_dict(synapse)), ex=30)
             tasks.append(task)
         await asyncio.gather(*tasks)
 
