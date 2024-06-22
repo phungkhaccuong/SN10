@@ -38,7 +38,10 @@ class PlarsimCheater():
 
     def generate(self, allocation):
         X = np.array(list(allocation.values()))
+        print(f'First x : {X}')
         results = [allocation]
+        print(f'First results : {results}')
+        print(f'_sphere_points: {len(self._sphere_points)}')
         for adjust_vec in self._sphere_points:
             result_vec = X + adjust_vec
             if np.any(result_vec < 0):
@@ -47,4 +50,6 @@ class PlarsimCheater():
                 result_vec += y
             next_allocation = {k: v for k, v in zip(allocation.keys(), result_vec)}
             results.append(next_allocation)
+
+        print(f"final result:{results}")
         return results
