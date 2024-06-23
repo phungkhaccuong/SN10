@@ -40,6 +40,7 @@ class PlarsimCheater():
         X = np.array(list(allocation.values()))
         results = []
         for adjust_vec in self._sphere_points:
+            print(f'adjust_vec:::{adjust_vec}')
             result_vec = X + adjust_vec
             if np.any(result_vec < 0):
                 # adjust the result to avoid having negative allocation
